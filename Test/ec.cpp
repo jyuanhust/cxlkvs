@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <isa-l.h>
+
+#define DATA_BLOCKS 5      // 原始数据块数
+#define PARITY_BLOCKS 3    // 校验块数
+#define BLOCK_SIZE 1024    // 每个数据块的大小（字节）
+
+int main() {
+    uint8_t *data_blocks[DATA_BLOCKS];
+    uint8_t *parity_blocks[PARITY_BLOCKS];
+    uint8_t g_tbls[32 * DATA_BLOCKS * PARITY_BLOCKS];  // 存储生成矩阵表
+    int i;
+
+    // 分配数据块和校验块
+    for (i = 0; i < DATA_BLOCKS; i++) {
+        data_blocks[i] = (uint8_t*)malloc(BLOCK_SIZE);
+        memset(data_blocks[i], i + 1, BLOCK_SIZE);  // 填充数据
+    }
+    for (i = 0; i < PARITY_BLOCKS; i++) {
+        parity_blocks[i] = (uint8_t*)malloc(BLOCK_SIZE);
+        memset(parity_blocks[i], 0, BLOCK_SIZE);    // 初始化校验块为 0
+    }
+
+    // 初始化生成矩阵表
+    uint8_t encode_matrix[DATA_BLOCKS * (DATA_BLOCKS + PARITY_BLOCKS)];
+    gf_gen_rs_matrix(encode_matrix, DATA_BLOCKS + PARITY_BLOCKS, DATA_BLOCKS);
+    ec_init_tables(DATA_BLOCKS, PARITY_BLOCKS, &encode_matrix[DATA_BLOCKS * DATA_BLOCKS], g_tbls);
+
+    // RS 编码
+    ec_encode_data(BLOCK_SIZE, DATA_BLOCKS, PARITY_BLOCKS, g_tbls, data_blocks, parity_blocks);
+
+    printf("Encoding completed. Parity blocks:\n");
+    for (i = 0; i < PARITY_BLOCKS; i++) {
+        printf("Parity block %d: ", i);
+        for (int j = 0; j < 16; j++) {  // 只打印前 16 字节
+            printf("%02x ", parity_blocks[i][j]);
+        }
+        printf("\n");
+    }
+
+    return 0;
+
+    // 模拟损坏一个数据块
+    memset(data_blocks[2], 0, BLOCK_SIZE);
+    printf("Data block 2 corrupted.\n");
+
+    // 使用解码恢复损坏的数据块
+    uint8_t *recovered_blocks[DATA_BLOCKS];
+    int erasures[PARITY_BLOCKS] = {2, -1};  // 损坏块的索引
+    ec_init_tables(DATA_BLOCKS, PARITY_BLOCKS, &encode_matrix[DATA_BLOCKS * DATA_BLOCKS], g_tbls);
+    ec_encode_data(BLOCK_SIZE, DATA_BLOCKS, PARITY_BLOCKS, g_tbls, data_blocks, parity_blocks);
+
+    // 这上面有问题的吧，怎么解码和编码一样
+    
+    printf("Decoded data for block 2:\n");
+    for (i = 0; i < 16; i++) {
+        printf("%02x ", data_blocks[2][i]);
+    }
+    printf("\n");
+
+    // 释放内存
+    for (i = 0; i < DATA_BLOCKS; i++) free(data_blocks[i]);
+    for (i = 0; i < PARITY_BLOCKS; i++) free(parity_blocks[i]);
+
+    return 0;
+}
