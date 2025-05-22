@@ -107,12 +107,13 @@ extern "C" void* insert(void* arg) {
         
         if(check_encode(keys_encode)) {
             // 如果有足够的非空闲队列，则进行编码
-            encode_store(keys_encode);
+            int stripe_id = -1;
+            encode_store(keys_encode, &stripe_id);
 
             // 存储条带元数据信息，object_index和stripe_index
-            int stripe_id = -1;
-            sscanf()
-            for()
+            for(int i = 0; i < keys_encode.size(); i++){
+                
+            }
         }
     }
 

@@ -133,8 +133,9 @@ bool check_encode(vector<char*>& keys_encode) {
 /**
  * 在cxlkvs中分配校验块的内存，对传入的key进行编码并存储
  * keys_encode为待编码的键
+ * 为了获取到stripeID, 加上了一个参数用于写入中间的stripeID
  */
-bool encode_store(vector<char*>& keys_encode) {
+bool encode_store(vector<char*>& keys_encode, int* stripe_ID) {
     if (kvs == nullptr || keys_encode.size() != K)
         return false;
 
@@ -145,7 +146,10 @@ bool encode_store(vector<char*>& keys_encode) {
 
     // 多线程编码对stripe_count的竞争
     int stripe_id = stripe_count.fetch_add(1);  // 初始化为-1，先自增1，形成独占
-
+    if(stripe_ID != nullptr){   // 检查，可能传入的参数为null
+        *stripe_ID = stripe_id; // 写到参数里面
+    }
+    
     // 设置校验块的key
     for (int i = 0; i < N - K; i++) {
         char* parity_key = (char*)malloc(key_size);

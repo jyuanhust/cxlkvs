@@ -24,4 +24,4 @@ void cache_unec_key(int thread_id, char* key);
 
 bool check_encode(vector<char*>& keys_encode);
 
-bool encode_store(vector<char*>& keys_encode);
+bool encode_store(vector<char*>& keys_encode, int* stripe_ID);
