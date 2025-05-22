@@ -20,6 +20,8 @@
 map<int, vector<char*>> data_insert;
 map<int, vector<Txn>> data_txn;
 
+pthread_barrier_t barrier;
+
 /**
  * 多线程插入数据
  * 传入 task_id 的地址 task_id 即相当于线程id
@@ -101,6 +103,7 @@ extern "C" void* insert(void* arg) {
     }
 
     // 至此，插入数据完成
+    pthread_barrier_wait(&barrier);
 
     // 让所有线程等待全部数据都插入完成后再开始执行更新操作
 
@@ -128,6 +131,8 @@ int main(int argc, char* argv[]) {
 
     // 打印数据集内容
     // workload_print(data_insert, data_txn);
+    
+    pthread_barrier_init(&barrier,NULL,nthreads);
 
     delete (kvs);
     delete (obj_index);
