@@ -135,12 +135,15 @@ bool check_encode(vector<char*>& keys_encode) {
  * 为了获取到stripeID, 加上了一个参数用于写入中间的stripeID
  */
 bool encode_store(vector<char*>& keys_encode, int stripe_id) {
+    // 检查kvs是否为空，以及keys_encode的大小是否等于K
     if (kvs == nullptr || keys_encode.size() != K)
         return false;
 
+    // 定义数据块和校验块的内存
     unsigned char* data[K];
     unsigned char* parity[N - K];
 
+    // 定义校验块的key
     vector<char*> parity_keys;
 
     // 设置校验块的key

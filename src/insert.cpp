@@ -6,6 +6,7 @@
 #include "bufferqueue.h"
 #include "fred.h"
 #include "meta.h"
+#include "utils.h"
 
 #include "timer.h"
 
@@ -17,31 +18,6 @@
 
 // 存储 thread_id->keys 的map，即 服务器id -》 其所要处理的数据
 map<int, vector<char*>> data_insert;
-
-std::hash<std::string> hash_fn;
-int hash_to_range(const std::string& str, int range) {
-    // 使用 std::hash 获取字符串的哈希值
-    size_t hash_value = hash_fn(str);
-
-    // 通过对哈希值取模，将哈希值限制在指定范围内
-    return hash_value % range;
-}
-
-/**
- * node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11
- * 24 25 26 27 28 29 30 31 32 33 34 35
- *
- * 根据task_id选取一个的cpu核心
- */
-int get_core_id(int task_id) {
-    int core_ids[] = {
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-        24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35};
-    int num_cores = sizeof(core_ids) / sizeof(core_ids[0]);
-
-    // 使用 task_id 对核心数量取模，返回对应核心 ID
-    return core_ids[task_id % num_cores];
-}
 
 /**
  * 多线程插入数据
@@ -142,7 +118,20 @@ int main(int argc, char* argv[]) {
 
     init_buffer_queue();
 
-    cout << "Hello main" << endl;
+    // 数据集读取
+    string path_load = "../workloadGen/workloads_arrange/ycsb_load_workloada";
+
+    workload_load(data_insert, path_load);
+
+    // 打印
+    int j = 0;
+    for (auto it = data_insert.begin(); it != data_insert.end(); it++) {
+        cout << "thread " << j++ << ": " << it->second.size();
+        // for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+        //     cout << *it2 << " ";
+        // }
+        cout << endl;
+    }
 
     delete (kvs);
     delete (obj_index);
@@ -152,49 +141,15 @@ int main(int argc, char* argv[]) {
 
     HL::Fred* threads;
 
-    if (argc >= 2) {
-        nthreads = atoi(argv[1]);
-    }
+    // if (argc >= 2) {
+    //     nthreads = atoi(argv[1]);
+    // }
 
     threads = new HL::Fred[nthreads];
-
-    // 文本文件读取
-    string path_load = "../workloadGen/workloads_arrange/ycsb_load_workloada";
-
-    ifstream file_load(path_load);
-
-    if (!file_load.is_open()) {
-        cerr << "无法打开文件!" << endl;
-        return 1;
-    }
-
-    string line;
-
-    while (getline(file_load, line)) {  // 逐行读取文件
-
-        // INSERT	user6284781860667377211
-
-        istringstream ss(line);
-        string part;
-        ss >> part;
-        string key_str;
-        if (ss >> key_str) {
-            // std::cout << "提取的部分: " << key_str << "长度为" << key_str.length() << std::endl;
-            // key的长度
-            int key_hash = hash_to_range(key_str, nthreads);
-            char* key = (char*)malloc(key_size * sizeof(char));
-            memset(key, 0, key_size * sizeof(char));
-            memcpy(key, key_str.c_str(), key_str.size());
-            data_insert[key_hash].push_back(key);
-        }
-    }
-
-    file_load.close();
 
     return 0;
 
     HL::Timer t;
-    // Timer t;
 
     t.start();
 

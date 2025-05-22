@@ -20,6 +20,7 @@ add_executable(insert
     src/meta.cpp
     src/objectindex.cpp
     src/stripe_index.cpp
+    src/utils.cpp
 )
 
 target_include_directories(insert PRIVATE ${INCLUDE_DIRECTORIES})
