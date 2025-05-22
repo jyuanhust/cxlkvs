@@ -18,6 +18,7 @@
 
 // 存储 thread_id->keys 的map，即 服务器id -》 其所要处理的数据
 map<int, vector<char*>> data_insert;
+map<int, vector<Txn>> data_txn;
 
 /**
  * 多线程插入数据
@@ -118,20 +119,15 @@ int main(int argc, char* argv[]) {
 
     init_buffer_queue();
 
-    // 数据集读取
-    string path_load = "../workloadGen/workloads_arrange/ycsb_load_workloada";
+    // 数据集读取，防止路径错误，使用绝对路径
+    string path_load = "/home/hjy/Projects/ComputeTransfer/workloadGen/workloads_arrange/ycsb_load_workloada";
+    string path_txn = "/home/hjy/Projects/ComputeTransfer/workloadGen/workloads_arrange/ycsb_txn_workloada";
 
     workload_load(data_insert, path_load);
+    workload_txn(data_txn, path_txn);
 
-    // 打印
-    int j = 0;
-    for (auto it = data_insert.begin(); it != data_insert.end(); it++) {
-        cout << "thread " << j++ << ": " << it->second.size();
-        // for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++) {
-        //     cout << *it2 << " ";
-        // }
-        cout << endl;
-    }
+    // 打印数据集内容
+    // workload_print(data_insert, data_txn);
 
     delete (kvs);
     delete (obj_index);
@@ -173,6 +169,11 @@ int main(int argc, char* argv[]) {
     for (auto it = data_insert.begin(); it != data_insert.end(); it++) {
         for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++) {
             free(*it2);
+        }
+    }
+    for (auto it = data_txn.begin(); it != data_txn.end(); it++) {
+        for (size_t i = 0; i < it->second.size(); i++) {
+            free(it->second[i].key);
         }
     }
 }

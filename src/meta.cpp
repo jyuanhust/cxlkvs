@@ -2,7 +2,7 @@
 
 int nthreads = 8;  // 线程数量，也即内存节点服务器的数量
 
-int key_size = 30;
+int key_size = 50;
 int value_size = 100;
 
 int table_size = 1000;  // 哈希表的大小（桶的数量），多个结构共用
