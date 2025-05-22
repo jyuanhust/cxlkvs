@@ -8,8 +8,10 @@
 #include <sys/syscall.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include <iostream>
 #include <algorithm>
+#include <iostream>
+#include <map>
+#include <vector>
 #include "libmemcached/memcached.h"
 
 using namespace std;
@@ -53,14 +55,14 @@ int main(int argc, char* argv[]) {
     }
 
     // 初始化生成矩阵表
-    uint8_t encode_matrix[data_num * (data_num + parity_num)];
+    uint8_t encode_matrix[(data_num + parity_num) * data_num];
     uint8_t g_tbls[32 * data_num * parity_num];  // 存储生成矩阵表
     gf_gen_rs_matrix(encode_matrix, data_num + parity_num, data_num);
     ec_init_tables(data_num, parity_num, &encode_matrix[data_num * data_num], g_tbls);
 
-    //XOR
-    unsigned char encode_gftbl_xor[32 * 2 * 1];
-    unsigned char encode_matrix_xor[3 * 2];
+    // XOR
+    uint8_t encode_gftbl_xor[32 * 2 * 1];
+    uint8_t encode_matrix_xor[3 * 2];
 
     gf_gen_rs_matrix(encode_matrix_xor, 3, 2);
     ec_init_tables(2, 1, &(encode_matrix_xor[2 * 2]), encode_gftbl_xor);
@@ -84,77 +86,79 @@ int main(int argc, char* argv[]) {
         printf("\n");
     }
 
-    uint8_t* delta_data = (uint8_t*)malloc(block_size);
-    uint8_t* delta_parity[parity_num];
-    uint8_t* new_parity[parity_num];
-
-    int index_wrong = 1; // 更新的数据块的索引
-
-    // 生成新的数据块
-    uint8_t *new_data = (uint8_t*)malloc(block_size);
-    memset(new_data, data_num + 1, block_size * sizeof(uint8_t));
-
-    //data delta
-    uint8_t* d[2];
-    d[0] = data_blocks[index_wrong];
-    d[1] = new_data;
-
-    ec_encode_data(block_size, 2, 1, encode_gftbl_xor, d, &delta_data);
-
-    //4. create parity deltas
-    for (int j = 0; j < parity_num; j++)
-    {
-        delta_parity[j] = (uint8_t*)malloc(block_size);
-        new_parity[j] = (uint8_t*)malloc(block_size);
+    uint8_t* recover_srcs[data_num];    // 保存用于恢复的k个完好的块
+    uint8_t* recover_outp[parity_num];  // 保存恢复后的块
+    for (i = 0; i < parity_num; i++) {
+        recover_outp[i] = (uint8_t*)malloc(block_size);
     }
 
-    ec_encode_data_update(block_size, data_num, parity_num, index_wrong, g_tbls, delta_data, delta_parity);
+    // 假如错的个数不是parity_num呢
 
-    for (int j = 0; j < parity_num; j++)
-    {
-        uint8_t* p[2];
-        p[0] = parity_blocks[j];
-        p[1] = delta_parity[j];
+    uint8_t temp_matrix[data_num * data_num] = {0};
+    uint8_t invert_matrix[(data_num + parity_num) * data_num] = {0};
+    uint8_t decode_matrix[(data_num + parity_num) * data_num] = {0};
 
-        ec_encode_data(block_size, 2, 1, encode_gftbl_xor, p, &(new_parity[j]));
+    uint8_t decode_gftbl[32 * data_num * parity_num];
+
+    vector<int> erased = {1, 2, 3};  // 出错块的索引
+    map<int, bool> block_in_err;
+    for (int ele : erased) {
+        block_in_err[ele] = true;
     }
-    // 至此，以增量块计算的形式得到新校验块
 
-    cout << endl << "New parity blocks calculated by delta:" << endl;
-    // 打印新校验块的内容
-    for (i = 0; i < PARITY_BLOCKS; i++) {
-        for (int j = 0; j < 16; j++) {  // 只打印前 16 字节
-            printf("%02x ", new_parity[i][j]);
+    for (int i = 0, r = 0; i < data_num; i++, r++) {
+        while (block_in_err[r])
+            r++;
+
+        for (int j = 0; j < data_num; j++) {
+            temp_matrix[data_num * i + j] = encode_matrix[data_num * r + j];
         }
-        printf("\n");
+
+        if (r < data_num)
+            recover_srcs[i] = data_blocks[r];
+        else
+            recover_srcs[i] = parity_blocks[r - data_num];
     }
 
-    // 以普通编码形式获得新检验快
-    swap(data_blocks[index_wrong], new_data);
-    ec_encode_data(block_size, data_num, parity_num, g_tbls, data_blocks, parity_blocks);
+    if (gf_invert_matrix(temp_matrix, invert_matrix, data_num) < 0)
+        return -1;
 
-    cout << endl << "New parity blocks calculated by normal encoding:" << endl;
-    // 打印新校验块的内容
-    for (i = 0; i < PARITY_BLOCKS; i++) {
-        for (int j = 0; j < 16; j++) {  // 只打印前 16 字节
-            printf("%02x ", parity_blocks[i][j]);
+    i = 0;
+    for (int ele : erased) {
+        if (ele < data_num) {
+            for (int j = 0; j < data_num; j++) {
+                decode_matrix[data_num * i + j] = invert_matrix[data_num * ele + j];
+            }
+        } else {
+            // 校验块出错
+            for (int j = 0; j < data_num; j++) {
+                uint8_t s = 0;
+                for (int p = 0; p < data_num; p++) {
+                    s ^= gf_mul(encode_matrix[data_num * ele + p], invert_matrix[p * data_num + j]);
+                }
+
+                decode_matrix[data_num * i + j] = s;
+            }
         }
-        printf("\n");
+        i++;
     }
 
+    ec_init_tables(data_num, erased.size(), decode_matrix, g_tbls);
+    ec_encode_data(block_size, data_num, erased.size(), g_tbls, recover_srcs, recover_outp);
+
+    // 查看恢复后的块的内容
+    cout << "Recovered blocks:" << endl;
+    for (i = 0; i < erased.size(); i++) {
+        for (int j = 0; j < 16; j++) {  // 只打印前 16 字节
+            printf("%02x ", recover_outp[i][j]);
+        }
+    }
 
     // 释放内存
     for (i = 0; i < data_num; i++)
         free(data_blocks[i]);
     for (i = 0; i < parity_num; i++)
         free(parity_blocks[i]);
-
-    free(delta_data);
-    for (i = 0; i < parity_num; i++){
-        free(delta_parity[i]);
-        free(new_parity[i]);
-    }
-    free(new_data);
 
     return 0;
 }

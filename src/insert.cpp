@@ -4,11 +4,10 @@
 #include <sstream>
 #include <vector>
 #include "fred.h"
+#include "meta.h"
+#include "bufferqueue.h"
 
-#include "meta.cpp"
 #include "timer.h"
-
-// #include "params.h"  // 加这一行代码就会出现重定义的错误
 
 #include <functional>  // std::hash
 
@@ -67,10 +66,6 @@ extern "C" void* insert(void* arg) {
 
     CPU_SET(core_id, &cpuset);
 
-    // 这两个的返回值不同
-    // printf("worker  %lu \n", pthread_self());
-    // printf("worker  ::syscall(SYS_gettid)  %ld\n", ::syscall(SYS_gettid));
-
     set_result = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
     if (set_result != 0) {
         fprintf(stderr, "setaffinity failed for thread %d to cpu %d\n", task_id, core_id);
@@ -108,15 +103,25 @@ extern "C" void* insert(void* arg) {
         // 空闲队列数和
         cache_unec_key(task_id, key);
 
-        vector<char*> keys_encode;
+        vector<char*> keys_encode;  // 存储要编码的key
+        
         if(check_encode(keys_encode)) {
             // 如果有足够的非空闲队列，则进行编码
             encode_store(keys_encode);
 
-            // 存储条带元数据信息
-            
+            // 存储条带元数据信息，object_index和stripe_index
+            int stripe_id = -1;
+            sscanf()
+            for()
         }
     }
+
+    // 让所有线程等待全部数据都插入完成后再开始执行更新操作
+    
+
+    // 插入和更新能分离嘛？
+    // 本地kvs的变量定义可能导致很难分离开
+
 
     return NULL;
 }
@@ -124,9 +129,16 @@ extern "C" void* insert(void* arg) {
 
 int main(int argc, char* argv[]) {
     // 初始化内存池中的数据
-    cout << "hello" << endl;
-    init_meta();
-    destroy_meta();
+    // init_meta();
+    // destroy_meta();
+    // return 0;
+
+    // 全局变量的定义和初始化（内存池中的数据） meta.h
+    kvs = new KVStore(30, 100, 4, 4);
+    stripe_count.store(-1);
+    delete(kvs);
+    
+    cout << "Hello" << endl;
     return 0;
 
     HL::Fred* threads;
@@ -138,18 +150,18 @@ int main(int argc, char* argv[]) {
     threads = new HL::Fred[nthreads];
 
     // 文本文件读取
-    string path = "../data/ycsb_set.txt";
+    string path_load = "../workloadGen/workloads_arrange/ycsb_load_workloada";
 
-    ifstream file(path);
+    ifstream file_load(path_load);
 
-    if (!file.is_open()) {
+    if (!file_load.is_open()) {
         cerr << "无法打开文件!" << endl;
         return 1;
     }
 
     string line;
 
-    while (getline(file, line)) {  // 逐行读取文件
+    while (getline(file_load, line)) {  // 逐行读取文件
 
         // INSERT	user6284781860667377211
 
@@ -158,7 +170,8 @@ int main(int argc, char* argv[]) {
         ss >> part;
         string key_str;
         if (ss >> key_str) {
-            // std::cout << "提取的部分: " << key << std::endl;
+            // std::cout << "提取的部分: " << key_str << "长度为" << key_str.length() << std::endl;
+            // key的长度
             int key_hash = hash_to_range(key_str, nthreads);
             char* key = (char*)malloc(key_size * sizeof(char));
             memset(key, 0, key_size * sizeof(char));
@@ -167,7 +180,9 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    file.close();
+    file_load.close();
+
+    return 0;
 
     HL::Timer t;
     // Timer t;

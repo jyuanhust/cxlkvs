@@ -1,0 +1,29 @@
+
+
+
+workload_spec 为配置文件
+
+
+```
+recordcount	YCSB load阶段加载的记录条数
+operationcount	YCSB run阶段执行的操作总数
+workload	workload实现类
+readallfields	查询时是否读取记录的所有字段
+readproportion	读操作的百分比
+updateproportion	更新操作的百分比
+scanproportion	插入操作的百分比
+```
+
+
+```shell
+
+export PATH="/home/hjy/Projects/ycsb-0.17.0/bin"
+
+
+~/Projects/ycsb-0.17.0/bin/ycsb load basic -P workload_spec/workload_spec/workloada  -s > workloads/a
+
+```
+
+ycsb load生成的是insert操作
+
+ycsb run生成的是read和update操作

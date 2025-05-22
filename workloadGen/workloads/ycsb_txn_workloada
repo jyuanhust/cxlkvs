@@ -1,0 +1,97 @@
+***************** properties *****************
+"insertproportion"="0"
+"fieldcount"="1"
+"fieldlength"="1"
+"readproportion"="0.5"
+"scanproportion"="0"
+"readallfields"="true"
+"dotransactions"="true"
+"status"="true"
+"requestdistribution"="zipfian"
+"workload"="site.ycsb.workloads.CoreWorkload"
+"recordcount"="50"
+"updateproportion"="0.5"
+"db"="site.ycsb.BasicDB"
+"operationcount"="50"
+**********************************************
+READ usertable user7229678446045915210 [ <all fields>]
+UPDATE usertable user1820151046732198393 [ field0=0 ]
+UPDATE usertable user5585583857047162145 [ field0=" ]
+UPDATE usertable user4052466453699787802 [ field0=  ]
+READ usertable user412164360235391016 [ <all fields>]
+READ usertable user4640687271668624146 [ <all fields>]
+UPDATE usertable user2056258949234144081 [ field0=$ ]
+READ usertable user412164360235391016 [ <all fields>]
+UPDATE usertable user1000385178204227360 [ field0=4 ]
+READ usertable user5228908089637460490 [ <all fields>]
+UPDATE usertable user176056457733445328 [ field0=8 ]
+READ usertable user2408371864701034737 [ <all fields>]
+UPDATE usertable user4997363039078325801 [ field0=/ ]
+UPDATE usertable user532732225143146983 [ field0=0 ]
+UPDATE usertable user5585583857047162145 [ field0=1 ]
+UPDATE usertable user55488592825689361 [ field0=6 ]
+UPDATE usertable user6752434813728457588 [ field0=4 ]
+READ usertable user9105318085603802964 [ <all fields>]
+READ usertable user4640687271668624146 [ <all fields>]
+UPDATE usertable user1699583181824442426 [ field0=6 ]
+READ usertable user2996592682669871081 [ <all fields>]
+READ usertable user3584813500638707425 [ <all fields>]
+UPDATE usertable user6873002678636213555 [ field0=. ]
+READ usertable user176056457733445328 [ <all fields>]
+READ usertable user1699583181824442426 [ <all fields>]
+READ usertable user2644479767202980425 [ <all fields>]
+READ usertable user764277275702281672 [ <all fields>]
+READ usertable user2287803999793278770 [ <all fields>]
+UPDATE usertable user8164984352168075964 [ field0=0 ]
+UPDATE usertable user8753205170136912308 [ field0=< ]
+UPDATE usertable user2056258949234144081 [ field0=" ]
+UPDATE usertable user8984750220696046997 [ field0== ]
+UPDATE usertable user9105318085603802964 [ field0=/ ]
+READ usertable user8164984352168075964 [ <all fields>]
+UPDATE usertable user5585583857047162145 [ field0=2 ]
+UPDATE usertable user8517097267634966620 [ field0=: ]
+READ usertable user8984750220696046997 [ <all fields>]
+READ usertable user2996592682669871081 [ <all fields>]
+UPDATE usertable user6520889763169322899 [ field0=4 ]
+READ usertable user8049444314573886243 [ <all fields>]
+READ usertable user3353268450079572736 [ <all fields>]
+READ usertable user2287803999793278770 [ <all fields>]
+UPDATE usertable user6873002678636213555 [ field0=' ]
+UPDATE usertable user1699583181824442426 [ field0=* ]
+READ usertable user5228908089637460490 [ <all fields>]
+READ usertable user2287803999793278770 [ <all fields>]
+READ usertable user2287803999793278770 [ <all fields>]
+READ usertable user2765047632110736392 [ <all fields>]
+READ usertable user7340655631697293932 [ <all fields>]
+READ usertable user3700353538232897146 [ <all fields>]
+[OVERALL], RunTime(ms), 32
+[OVERALL], Throughput(ops/sec), 1562.5
+[TOTAL_GCS_G1_Young_Generation], Count, 0
+[TOTAL_GC_TIME_G1_Young_Generation], Time(ms), 0
+[TOTAL_GC_TIME_%_G1_Young_Generation], Time(%), 0.0
+[TOTAL_GCS_G1_Old_Generation], Count, 0
+[TOTAL_GC_TIME_G1_Old_Generation], Time(ms), 0
+[TOTAL_GC_TIME_%_G1_Old_Generation], Time(%), 0.0
+[TOTAL_GCs], Count, 0
+[TOTAL_GC_TIME], Time(ms), 0
+[TOTAL_GC_TIME_%], Time(%), 0.0
+[READ], Operations, 27
+[READ], AverageLatency(us), 81.29629629629629
+[READ], MinLatency(us), 40
+[READ], MaxLatency(us), 1090
+[READ], 95thPercentileLatency(us), 52
+[READ], 99thPercentileLatency(us), 1090
+[READ], Return=OK, 27
+[CLEANUP], Operations, 1
+[CLEANUP], AverageLatency(us), 2.0
+[CLEANUP], MinLatency(us), 2
+[CLEANUP], MaxLatency(us), 2
+[CLEANUP], 95thPercentileLatency(us), 2
+[CLEANUP], 99thPercentileLatency(us), 2
+[UPDATE], Operations, 23
+[UPDATE], AverageLatency(us), 96.78260869565217
+[UPDATE], MinLatency(us), 62
+[UPDATE], MaxLatency(us), 786
+[UPDATE], 95thPercentileLatency(us), 84
+[UPDATE], 99thPercentileLatency(us), 786
+[UPDATE], Return=OK, 23

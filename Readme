@@ -1,4 +1,18 @@
 
+## 项目结构
+
+├── build
+├── CMakeLists.txt
+├── data
+├── include
+├── Readme
+├── rmshm.sh
+├── src
+├── Test
+├── timeTest
+└── workloadGen
+
+
 
 ## 编解码代码
 
@@ -79,3 +93,4 @@ int main() {
 
 
 ```
+

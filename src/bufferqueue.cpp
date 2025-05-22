@@ -1,33 +1,38 @@
-#include "meta.h"
+#include "bufferqueue.h"
 
 #include <iostream>
 
 // #include "params.h" // 不能再，否则会出现重定义的错误
+char* buffer_queue;
+int queue_shmid;
 
-void init_meta() {
+int queue_size = 100; // 缓存队列的大小，最多缓存100个key
+
+
+void init_buffer_queue() {
     size_t size = (sizeof(atomic<uint32_t>) + key_size * queue_size) * nthreads;
 
-    meta_shmid = shmget(IPC_PRIVATE, size, IPC_CREAT | 0664);
-    if (meta_shmid == -1) {
+    queue_shmid = shmget(IPC_PRIVATE, size, IPC_CREAT | 0664);
+    if (queue_shmid == -1) {
         perror("shmget failed");
         exit(-1);
     }
 
-    meta_data = (char*)shmat(meta_shmid, NULL, 0);
-    if (meta_data == (char*)-1) {
+    buffer_queue = (char*)shmat(queue_shmid, NULL, 0);
+    if (buffer_queue == (char*)-1) {
         perror("shmat failed");
         exit(-1);
     }
     unsigned long nodemask = (1UL << 1);
-    if (mbind(meta_data, size, MPOL_BIND, &nodemask, sizeof(nodemask) * 8, 0) == -1) {
+    if (mbind(buffer_queue, size, MPOL_BIND, &nodemask, sizeof(nodemask) * 8, 0) == -1) {
         perror("mbind failed");
         exit(-1);
     }
-    memset(meta_data, 0, size);
+    memset(buffer_queue, 0, size);
 }
 
-void destroy_meta() {
-    if (shmctl(meta_shmid, IPC_RMID, NULL) == -1) {
+void destroy_buffer_queue() {
+    if (shmctl(queue_shmid, IPC_RMID, NULL) == -1) {
         perror("shmctl failed");
         exit(1);
     }
@@ -35,7 +40,7 @@ void destroy_meta() {
 
 // 通过thread_id/服务器id获取key（内存分配）
 char* get_unec_key(int thread_id) {
-    atomic<uint32_t>* index_ptr = (atomic<uint32_t>*)(meta_data + thread_id * (sizeof(atomic<uint32_t>) + key_size * queue_size));
+    atomic<uint32_t>* index_ptr = (atomic<uint32_t>*)(buffer_queue + thread_id * (sizeof(atomic<uint32_t>) + key_size * queue_size));
     char* queue_start = (char*)index_ptr + sizeof(atomic<uint32_t>);
 
     char* key = (char*)malloc(key_size);
@@ -62,7 +67,7 @@ char* get_unec_key(int thread_id) {
 
 // 每个服务器的用于缓存未编码的key值
 void cache_unec_key(int thread_id, char* key) {
-    atomic<uint32_t>* index_ptr = (atomic<uint32_t>*)(meta_data + thread_id * (sizeof(atomic<uint32_t>) + key_size * queue_size));
+    atomic<uint32_t>* index_ptr = (atomic<uint32_t>*)(buffer_queue + thread_id * (sizeof(atomic<uint32_t>) + key_size * queue_size));
     char* queue_start = (char*)index_ptr + sizeof(atomic<uint32_t>);
 
     uint32_t index;
@@ -83,14 +88,16 @@ void cache_unec_key(int thread_id, char* key) {
     } while (!index_ptr->compare_exchange_weak(index, new_index));
 }
 
-// check
+/**
+ * 
+ */
 bool check_encode(vector<char*>& keys_encode) {
     vector<int> threads_encode;  // 待编码的服务器id
 
     int count = 0;
     int inc1 = encode_inc;
     for (int i = 0; i < nthreads; i++) {
-        atomic<uint32_t>* index_ptr = (atomic<uint32_t>*)(meta_data + (inc1 % nthreads) * (sizeof(atomic<uint32_t>) + key_size * queue_size));
+        atomic<uint32_t>* index_ptr = (atomic<uint32_t>*)(buffer_queue + (inc1 % nthreads) * (sizeof(atomic<uint32_t>) + key_size * queue_size));
 
         if (index_ptr->load() != 0) {
             threads_encode.push_back(inc1 % nthreads);
@@ -135,14 +142,16 @@ bool encode_store(vector<char*>& keys_encode) {
     unsigned char* parity[N - K];
 
     vector<char*> parity_keys;
+
+    // 多线程编码对stripe_count的竞争
+    int stripe_id = stripe_count.fetch_add(1);  // 初始化为-1，先自增1，形成独占
+
     // 设置校验块的key
     for (int i = 0; i < N - K; i++) {
         char* parity_key = (char*)malloc(key_size);
-        sprintf(parity_key, "SID%u-P%d", stripe_count, i);
+        sprintf(parity_key, "SID%u-P%d", stripe_id, i);
         parity_keys.push_back(parity_key);
     }
-    stripe_count++;
-
 
     // 从cxlkvs中获取数据块和校验块的内存
     for (int i = 0; i < K; i++) {
