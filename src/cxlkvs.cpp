@@ -36,14 +36,6 @@ KVStore::KVStore(int key_size, int value_size, int table_size, int area_size) {
 }
 
 void KVStore::alloc_cxl_mem() {
-#ifndef CXLMEM
-    this->hash_table = (char**)malloc(this->table_size * sizeof(char*));
-
-    memset(hash_table, 0, this->table_size * sizeof(char*));
-
-    free_area = (char*)malloc(this->entry_size * this->area_size);
-    memset(free_area, 0, this->entry_size * this->area_size);
-#else
     // 为hash_table分配内存
     size_t size = this->table_size * sizeof(char*);
     this->hash_table_shmid = shmget(IPC_PRIVATE, size, IPC_CREAT | 0664);
@@ -83,8 +75,6 @@ void KVStore::alloc_cxl_mem() {
         exit(-1);
     }
     memset(this->free_area, 0, size);
-
-#endif
 }
 
 char* KVStore::alloc_entry() {

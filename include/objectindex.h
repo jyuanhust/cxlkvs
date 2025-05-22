@@ -8,6 +8,8 @@
  *        temperature: uint32_t
  */
 
+#pragma once
+
 #include <numa.h>
 #include <numaif.h>
 #include <sys/shm.h>
@@ -18,7 +20,6 @@
 #include <cstring>
 #include <iostream>
 #include <string>
-#include "meta.h"
 
 
 using namespace std;
@@ -62,6 +63,7 @@ class ObjectIndex {
 
     int hash_index(char* key);
 
+    // 插入key，并设置stripe_id和offset
     void insert(char* key, uint32_t stripe_id, uint32_t offset);
 
     void get_info(char* key, uint32_t& stripe_id, uint32_t& offset);

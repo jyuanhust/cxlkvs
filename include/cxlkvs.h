@@ -33,7 +33,7 @@ class KVStore {
     char** hash_table;  //
     int table_size;     // hash_table的大小
 
-    int area_size;          // entry的数量
+    int area_size;          // 空闲区域的entry的数量
     char* free_area;        // 指向额外的空闲区域
     char* free_block_list;  // 指向空闲块列表
 

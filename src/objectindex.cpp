@@ -1,6 +1,9 @@
 
 #include "objectindex.h"
 
+
+#define CXLMEM
+
 ObjectIndex::ObjectIndex() {
     this->key_size = 50;
     this->entry_size = key_size + sizeof(uint32_t) * 3 + sizeof(char*);
@@ -26,14 +29,6 @@ ObjectIndex::ObjectIndex(int key_size, int table_size, int area_size) {
 }
 
 void ObjectIndex::alloc_cxl_mem() {
-#ifndef CXLMEM
-    this->hash_table = (char**)malloc(this->table_size * sizeof(char*));
-
-    memset(hash_table, 0, this->table_size * sizeof(char*));
-
-    free_area = (char*)malloc(this->entry_size * this->area_size);
-    memset(free_area, 0, this->entry_size * this->area_size);
-#else
     // 为hash_table分配内存
     size_t size = this->table_size * sizeof(char*);
     this->hash_table_shmid = shmget(IPC_PRIVATE, size, IPC_CREAT | 0664);
@@ -73,8 +68,6 @@ void ObjectIndex::alloc_cxl_mem() {
         exit(-1);
     }
     memset(this->free_area, 0, size);
-
-#endif
 }
 
 // 每个entry由key(key_size字节) + stripe_id(4字节) + offset(4字节) + temperature(4字节) + char*（8字节，指向下一个entry）

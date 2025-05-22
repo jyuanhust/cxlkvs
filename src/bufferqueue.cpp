@@ -6,8 +6,7 @@
 char* buffer_queue;
 int queue_shmid;
 
-int queue_size = 100; // 缓存队列的大小，最多缓存100个key
-
+int queue_size = 100;  // 缓存队列的大小，最多缓存100个key
 
 void init_buffer_queue() {
     size_t size = (sizeof(atomic<uint32_t>) + key_size * queue_size) * nthreads;
@@ -89,7 +88,7 @@ void cache_unec_key(int thread_id, char* key) {
 }
 
 /**
- * 
+ *
  */
 bool check_encode(vector<char*>& keys_encode) {
     vector<int> threads_encode;  // 待编码的服务器id
@@ -135,7 +134,7 @@ bool check_encode(vector<char*>& keys_encode) {
  * keys_encode为待编码的键
  * 为了获取到stripeID, 加上了一个参数用于写入中间的stripeID
  */
-bool encode_store(vector<char*>& keys_encode, int* stripe_ID) {
+bool encode_store(vector<char*>& keys_encode, int stripe_id) {
     if (kvs == nullptr || keys_encode.size() != K)
         return false;
 
@@ -144,12 +143,6 @@ bool encode_store(vector<char*>& keys_encode, int* stripe_ID) {
 
     vector<char*> parity_keys;
 
-    // 多线程编码对stripe_count的竞争
-    int stripe_id = stripe_count.fetch_add(1);  // 初始化为-1，先自增1，形成独占
-    if(stripe_ID != nullptr){   // 检查，可能传入的参数为null
-        *stripe_ID = stripe_id; // 写到参数里面
-    }
-    
     // 设置校验块的key
     for (int i = 0; i < N - K; i++) {
         char* parity_key = (char*)malloc(key_size);
@@ -162,7 +155,7 @@ bool encode_store(vector<char*>& keys_encode, int* stripe_ID) {
         data[i] = (unsigned char*)kvs->get(keys_encode[i], false);
     }
 
-    for(int i = 0; i < N - K; i++)
+    for (int i = 0; i < N - K; i++)
         parity[i] = (unsigned char*)kvs->get(parity_keys[i], true);
 
     // 编码（这里的一些数据需不需要变成全局变量）

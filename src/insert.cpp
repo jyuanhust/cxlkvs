@@ -3,9 +3,9 @@
 #include <map>
 #include <sstream>
 #include <vector>
+#include "bufferqueue.h"
 #include "fred.h"
 #include "meta.h"
-#include "bufferqueue.h"
 
 #include "timer.h"
 
@@ -15,7 +15,8 @@
 #define THREAD_PINNING
 #endif
 
-map<int, vector<char*>> data_insert;  // 存储 thread_id->keys 的map
+// 存储 thread_id->keys 的map，即 服务器id -》 其所要处理的数据
+map<int, vector<char*>> data_insert;
 
 std::hash<std::string> hash_fn;
 int hash_to_range(const std::string& str, int range) {
@@ -104,42 +105,49 @@ extern "C" void* insert(void* arg) {
         cache_unec_key(task_id, key);
 
         vector<char*> keys_encode;  // 存储要编码的key
-        
-        if(check_encode(keys_encode)) {
+
+        if (check_encode(keys_encode)) {
             // 如果有足够的非空闲队列，则进行编码
-            int stripe_id = -1;
-            encode_store(keys_encode, &stripe_id);
+
+            // 多线程编码对stripe_count的竞争
+            uint32_t stripe_id = stripe_count.fetch_add(1);  // 初始化为-1，先自增1，形成独占
+            encode_store(keys_encode, stripe_id);
 
             // 存储条带元数据信息，object_index和stripe_index
-            for(int i = 0; i < keys_encode.size(); i++){
-                
+            // 插入操作不设置热度
+            for (uint32_t offset = 0; offset < keys_encode.size(); offset++) {
+                obj_index->insert(keys_encode[offset], stripe_id, offset);
             }
+
+            stripe_index->push_keys(stripe_id, keys_encode);
         }
     }
 
+    // 至此，插入数据完成
+
     // 让所有线程等待全部数据都插入完成后再开始执行更新操作
-    
 
     // 插入和更新能分离嘛？
     // 本地kvs的变量定义可能导致很难分离开
 
-
     return NULL;
 }
 
-
 int main(int argc, char* argv[]) {
-    // 初始化内存池中的数据
-    // init_meta();
-    // destroy_meta();
-    // return 0;
-
     // 全局变量的定义和初始化（内存池中的数据） meta.h
-    kvs = new KVStore(30, 100, 4, 4);
+    kvs = new KVStore(key_size, value_size, table_size, area_size);
+    obj_index = new ObjectIndex(key_size, table_size, area_size);
+    stripe_index = new StripeIndex(key_size, stripe_num, K);
     stripe_count.store(-1);
-    delete(kvs);
-    
-    cout << "Hello" << endl;
+
+    init_buffer_queue();
+
+    cout << "Hello main" << endl;
+
+    delete (kvs);
+    delete (obj_index);
+    delete (stripe_index);
+    destroy_buffer_queue();
     return 0;
 
     HL::Fred* threads;

@@ -25,3 +25,12 @@ add_executable(insert
 target_include_directories(insert PRIVATE ${INCLUDE_DIRECTORIES})
 
 target_link_libraries(insert PRIVATE stdc++ numa pthread atomic isal)
+
+add_executable(object_index_test
+    test/object_index_test.cpp
+    src/objectindex.cpp
+)
+
+target_include_directories(object_index_test PRIVATE ${INCLUDE_DIRECTORIES})
+
+target_link_libraries(object_index_test PRIVATE stdc++ numa pthread atomic isal)
