@@ -103,12 +103,25 @@ extern "C" void* insert(void* arg) {
     }
 
     // 至此，插入数据完成
-    pthread_barrier_wait(&barrier);
 
     // 让所有线程等待全部数据都插入完成后再开始执行更新操作
+    pthread_barrier_wait(&barrier);
+
+    // 就地更新
+    for (auto it = data_txn[task_id].begin(); it != data_txn[task_id].end(); it++){
+        if(it->op == 0){
+            continue; // read, skip
+        }else{
+            
+        }
+    }
 
     // 插入和更新能分离嘛？
     // 本地kvs的变量定义可能导致很难分离开
+
+    // 释放value占用的内存
+    for(auto it = local_kvs.begin(); it != local_kvs.end(); it++)
+        free(it->second);
 
     return NULL;
 }

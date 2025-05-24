@@ -77,6 +77,17 @@ void KVStore::alloc_cxl_mem() {
     memset(this->free_area, 0, size);
 }
 
+// 初始化entry空闲区域
+void KVStore::init_free_area() {
+    free_block_list = free_area;
+    char* cur = free_block_list;
+
+    for (int i = 0; i < this->area_size - 1; i++) {
+        *(char**)(cur + this->key_size + this->value_size) = cur + this->entry_size;
+        cur += this->entry_size;
+    }
+}
+
 char* KVStore::alloc_entry() {
     if (free_block_list == NULL) {
         perror("free_block_list is NULL");
@@ -97,7 +108,7 @@ char* KVStore::alloc_entry() {
     // 原子性地弹出free_block_list的第一个entry，防止多线程竞争
     do {
         ret = free_block_list;
-        new_free_block_list.store(ret + this->key_size + this->value_size);
+        new_free_block_list.store(*(char**)(ret + this->key_size + this->value_size));
     } while (!ptr->compare_exchange_weak(ret, new_free_block_list));
 
     return ret;
@@ -158,8 +169,8 @@ char* KVStore::get(char* key, bool special) {
     if (!special) {
         char* cur = hash_table[index];
         while (cur != NULL) {
-            if (memcmp(cur, key, key_size) == 0) {
-                return cur + key_size;
+            if (memcmp(cur, key, this->key_size) == 0) {
+                return cur + this->key_size;
             }
             cur = *(char**)(cur + this->key_size + this->value_size);
         }
@@ -167,6 +178,7 @@ char* KVStore::get(char* key, bool special) {
     } else {
         // 暂时不进行条件判断
         char* entry = alloc_entry();
+        memcpy(entry, key, this->key_size);
 
         // char* cur = hash_table[index];
         // while (*(char**)(cur + this->key_size + this->value_size) != NULL) {
@@ -182,7 +194,7 @@ char* KVStore::get(char* key, bool special) {
             *(char**)(entry + this->key_size + this->value_size) = tmp;
         } while (!ptr->compare_exchange_weak(tmp, new_head));
 
-        return entry + key_size;
+        return entry + this->key_size;
     }
 }
 
@@ -205,15 +217,7 @@ KVStore::~KVStore() {
 #endif
 }
 
-void KVStore::init_free_area() {
-    free_block_list = free_area;
-    char* cur = free_block_list;
 
-    for (int i = 0; i < this->area_size - 1; i++) {
-        *(char**)(cur + this->key_size + this->value_size) = cur + this->entry_size;
-        cur += this->entry_size;
-    }
-}
 
 // int main(int argc, char const* argv[]) {
 //     /* code */

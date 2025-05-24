@@ -47,6 +47,17 @@ class KVStore {
 
     ~KVStore();
 
+    int hash_index(char* key);
+
+    void put(char* key, char* value);
+
+    // special为false时，从cxlkvs中获取key对应的value（char*），纯读取操作，要考虑竞争吗？假如一个在读一个在插入，头插法不会为此带来问题
+    // special为true时，为key分配其的value的内存，返回value（char*）
+    char* get(char* key, bool special);
+
+    void del(char* key);
+
+   private:
     void init_free_area();
 
     void alloc_cxl_mem();
@@ -57,14 +68,4 @@ class KVStore {
     char* alloc_entry();
 
     void free_entry(char* entry);
-
-    int hash_index(char* key);
-
-    void put(char* key, char* value);
-
-    // special为false时，从cxlkvs中获取key对应的value（char*），纯读取操作，要考虑竞争吗？假如一个在读一个在插入，头插法不会为此带来问题
-    // special为true时，为key分配其的value的内存，返回value（char*）
-    char* get(char* key, bool special);
-
-    void del(char* key);
 };

@@ -14,9 +14,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(INCLUDE_DIRECTORIES include)
 
 add_executable(insert
+    src/insert.cpp
     src/bufferqueue.cpp
     src/cxlkvs.cpp
-    src/insert.cpp
     src/meta.cpp
     src/objectindex.cpp
     src/stripe_index.cpp
@@ -35,3 +35,30 @@ add_executable(object_index_test
 target_include_directories(object_index_test PRIVATE ${INCLUDE_DIRECTORIES})
 
 target_link_libraries(object_index_test PRIVATE stdc++ numa pthread atomic isal)
+
+
+add_executable(thread_contact
+    test/thread_contact.cpp
+    src/bufferqueue.cpp
+    src/cxlkvs.cpp
+    src/meta.cpp
+    src/objectindex.cpp
+    src/stripe_index.cpp
+    src/utils.cpp
+)
+
+target_include_directories(thread_contact PRIVATE ${INCLUDE_DIRECTORIES})
+
+target_link_libraries(thread_contact PRIVATE stdc++ numa pthread atomic isal)
+
+
+add_executable(kvs_test
+    test/kvs_test.cpp
+    src/cxlkvs.cpp
+    src/meta.cpp
+    src/utils.cpp
+)
+
+target_include_directories(kvs_test PRIVATE ${INCLUDE_DIRECTORIES})
+
+target_link_libraries(kvs_test PRIVATE stdc++ numa pthread atomic isal)

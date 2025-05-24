@@ -52,6 +52,7 @@ char* get_unec_key(int thread_id) {
         index = index_ptr->load();
 
         if (index == 0) {
+            free(key);
             return nullptr;
         }
 
