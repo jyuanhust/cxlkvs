@@ -9,63 +9,28 @@
 "status"="true"
 "requestdistribution"="zipfian"
 "workload"="site.ycsb.workloads.CoreWorkload"
-"recordcount"="50"
+"recordcount"="15"
 "updateproportion"="0.5"
 "db"="site.ycsb.BasicDB"
-"operationcount"="50"
+"operationcount"="15"
 **********************************************
-INSERT usertable user6284781860667377211 [ field0=6 ]
-INSERT usertable user8517097267634966620 [ field0=! ]
-INSERT usertable user1820151046732198393 [ field0=- ]
-INSERT usertable user4052466453699787802 [ field0=& ]
-INSERT usertable user3232700585171816769 [ field0=5 ]
-INSERT usertable user1000385178204227360 [ field0=5 ]
-INSERT usertable user7697331399106995587 [ field0=1 ]
-INSERT usertable user5465015992139406178 [ field0== ]
-INSERT usertable user6873002678636213555 [ field0=> ]
-INSERT usertable user9105318085603802964 [ field0=$ ]
-INSERT usertable user2408371864701034737 [ field0=> ]
-INSERT usertable user4640687271668624146 [ field0=8 ]
-INSERT usertable user2644479767202980425 [ field0=/ ]
-INSERT usertable user412164360235391016 [ field0=* ]
-INSERT usertable user7109110581138159243 [ field0=< ]
-INSERT usertable user4876795174170569834 [ field0=, ]
-INSERT usertable user7461223496605049899 [ field0=) ]
-INSERT usertable user8753205170136912308 [ field0=& ]
-INSERT usertable user2996592682669871081 [ field0=> ]
-INSERT usertable user5228908089637460490 [ field0=: ]
-INSERT usertable user2056258949234144081 [ field0=: ]
-INSERT usertable user176056457733445328 [ field0=) ]
-INSERT usertable user6520889763169322899 [ field0=5 ]
-INSERT usertable user4288574356201733490 [ field0=3 ]
-INSERT usertable user8049444314573886243 [ field0=; ]
-INSERT usertable user8164984352168075964 [ field0=7 ]
-INSERT usertable user3584813500638707425 [ field0=? ]
-INSERT usertable user5817128907606296834 [ field0=' ]
-INSERT usertable user1468038131265307737 [ field0=8 ]
-INSERT usertable user764277275702281672 [ field0=2 ]
-INSERT usertable user5932668945200486555 [ field0=5 ]
-INSERT usertable user3700353538232897146 [ field0=- ]
-INSERT usertable user3931898588792031835 [ field0=2 ]
-INSERT usertable user6164213995759621244 [ field0=1 ]
-INSERT usertable user532732225143146983 [ field0=+ ]
-INSERT usertable user1699583181824442426 [ field0=: ]
-INSERT usertable user5585583857047162145 [ field0=; ]
-INSERT usertable user3353268450079572736 [ field0=- ]
-INSERT usertable user8396529402727210653 [ field0=. ]
-INSERT usertable user7817899264014751554 [ field0=" ]
-INSERT usertable user4520119406760868179 [ field0=$ ]
-INSERT usertable user6752434813728457588 [ field0=9 ]
-INSERT usertable user55488592825689361 [ field0=3 ]
-INSERT usertable user2287803999793278770 [ field0=$ ]
-INSERT usertable user4997363039078325801 [ field0=? ]
-INSERT usertable user2765047632110736392 [ field0=) ]
-INSERT usertable user8984750220696046997 [ field0=$ ]
-INSERT usertable user7229678446045915210 [ field0=! ]
-INSERT usertable user5108340224729704523 [ field0=) ]
-INSERT usertable user7340655631697293932 [ field0=* ]
-[OVERALL], RunTime(ms), 34
-[OVERALL], Throughput(ops/sec), 1470.5882352941176
+INSERT usertable user6284781860667377211 [ field0=2 ]
+INSERT usertable user8517097267634966620 [ field0=: ]
+INSERT usertable user1820151046732198393 [ field0=, ]
+INSERT usertable user4052466453699787802 [ field0=2 ]
+INSERT usertable user3232700585171816769 [ field0=' ]
+INSERT usertable user1000385178204227360 [ field0=" ]
+INSERT usertable user7697331399106995587 [ field0=+ ]
+INSERT usertable user5465015992139406178 [ field0=0 ]
+INSERT usertable user6873002678636213555 [ field0=" ]
+INSERT usertable user9105318085603802964 [ field0=, ]
+INSERT usertable user2408371864701034737 [ field0=2 ]
+INSERT usertable user4640687271668624146 [ field0=4 ]
+INSERT usertable user2644479767202980425 [ field0=3 ]
+INSERT usertable user412164360235391016 [ field0=. ]
+INSERT usertable user7109110581138159243 [ field0=, ]
+[OVERALL], RunTime(ms), 36
+[OVERALL], Throughput(ops/sec), 416.6666666666667
 [TOTAL_GCS_G1_Young_Generation], Count, 0
 [TOTAL_GC_TIME_G1_Young_Generation], Time(ms), 0
 [TOTAL_GC_TIME_%_G1_Young_Generation], Time(%), 0.0
@@ -76,15 +41,15 @@ INSERT usertable user7340655631697293932 [ field0=* ]
 [TOTAL_GC_TIME], Time(ms), 0
 [TOTAL_GC_TIME_%], Time(%), 0.0
 [CLEANUP], Operations, 1
-[CLEANUP], AverageLatency(us), 2.0
-[CLEANUP], MinLatency(us), 2
-[CLEANUP], MaxLatency(us), 2
-[CLEANUP], 95thPercentileLatency(us), 2
-[CLEANUP], 99thPercentileLatency(us), 2
-[INSERT], Operations, 50
-[INSERT], AverageLatency(us), 94.54
-[INSERT], MinLatency(us), 45
-[INSERT], MaxLatency(us), 2243
-[INSERT], 95thPercentileLatency(us), 92
-[INSERT], 99thPercentileLatency(us), 2243
-[INSERT], Return=OK, 50
+[CLEANUP], AverageLatency(us), 1.0
+[CLEANUP], MinLatency(us), 1
+[CLEANUP], MaxLatency(us), 1
+[CLEANUP], 95thPercentileLatency(us), 1
+[CLEANUP], 99thPercentileLatency(us), 1
+[INSERT], Operations, 15
+[INSERT], AverageLatency(us), 206.13333333333333
+[INSERT], MinLatency(us), 47
+[INSERT], MaxLatency(us), 2335
+[INSERT], 95thPercentileLatency(us), 113
+[INSERT], 99thPercentileLatency(us), 2335
+[INSERT], Return=OK, 15

@@ -67,6 +67,8 @@ void destroy_msg_queue() {
 /**
  * 向指定线程发送key
  * 本质为将key写入该thread对应的请求队列
+ * 
+ * 多线程写入的时候存在问题
  */
 void send_msg_key(int thread_id, char* key) {
     atomic<uint32_t>* index_ptr = (atomic<uint32_t>*)(msg_queue + thread_id * (sizeof(atomic<uint32_t>) + key_size * msg_queue_size));

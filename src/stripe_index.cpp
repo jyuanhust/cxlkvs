@@ -30,14 +30,20 @@ void StripeIndex::alloc_cxl_mem() {
     memset(this->free_area, 0, size);
 }
 
-void StripeIndex::push_keys(uint32_t stripe_id, vector<char*> keys_encode) {
+
+void StripeIndex::push_keys(uint32_t stripe_id, vector<char*> &keys_encode) {
+    cout << stripe_size << " " << keys_encode.size() << endl;
     assert(keys_encode.size() == stripe_size);
 
-    char* ptr = this->free_area + stripe_id * (sizeof(uint32_t) + (key_size + sizeof(uint8_t)) * stripe_size);
-    ptr = ptr + sizeof(uint32_t);
+    assert(stripe_id < stripe_num); // 检查stripe_id有没有越界，前面的初始化有问题导致的
+    char* ptr = this->free_area + stripe_id * (sizeof(uint32_t) + (key_size + sizeof(uint8_t)) * stripe_size);  // 指向stripe_id开始的条带存储位置
+    ptr = ptr + sizeof(uint32_t);  // 跳过temperature
     for (int i = 0; i < keys_encode.size(); i++) {
-        memcpy(ptr, keys_encode[i], key_size);
+        assert(ptr != nullptr && keys_encode[i] != nullptr);
+        memcpy(ptr, keys_encode[i], key_size);  // segmentation fault
+
         ptr = ptr + key_size;
+        // assert(ptr != nullptr && keys_encode[i] != nullptr);
         memset(ptr, 0, sizeof(uint8_t));
         ptr = ptr + sizeof(uint8_t);
     }

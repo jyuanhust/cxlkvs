@@ -9,56 +9,40 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # include_directories(${PROJECT_SOURCE_DIR}/include)
 
-# 添加可执行文件：列出所有 .cpp 文件（不需要 .h）
 
 set(INCLUDE_DIRECTORIES include)
 
-add_executable(insert
-    src/insert.cpp
-    src/bufferqueue.cpp
-    src/cxlkvs.cpp
-    src/meta.cpp
-    src/objectindex.cpp
-    src/stripe_index.cpp
-    src/utils.cpp
-)
 
-target_include_directories(insert PRIVATE ${INCLUDE_DIRECTORIES})
-
-target_link_libraries(insert PRIVATE stdc++ numa pthread atomic isal)
-
-add_executable(object_index_test
-    test/object_index_test.cpp
-    src/objectindex.cpp
-)
-
-target_include_directories(object_index_test PRIVATE ${INCLUDE_DIRECTORIES})
-
-target_link_libraries(object_index_test PRIVATE stdc++ numa pthread atomic isal)
+# 对src下的带有main的cpp文件执行编译
+foreach(TEST_NAME inplace)
+    add_executable(${TEST_NAME} 
+        src/${TEST_NAME}.cpp
+        src/bufferqueue.cpp
+        src/cxlkvs.cpp
+        src/meta.cpp
+        src/objectindex.cpp
+        src/stripe_index.cpp
+        src/utils.cpp
+    )
+  
+  target_link_libraries(${TEST_NAME} PUBLIC stdc++ numa pthread atomic isal)
+  target_include_directories(${TEST_NAME} PUBLIC ${INCLUDE_DIRECTORIES})
+endforeach()
 
 
-add_executable(thread_contact
-    test/thread_contact.cpp
-    src/bufferqueue.cpp
-    src/cxlkvs.cpp
-    src/meta.cpp
-    src/objectindex.cpp
-    src/stripe_index.cpp
-    src/utils.cpp
-)
 
-target_include_directories(thread_contact PRIVATE ${INCLUDE_DIRECTORIES})
-
-target_link_libraries(thread_contact PRIVATE stdc++ numa pthread atomic isal)
-
-
-add_executable(kvs_test
-    test/kvs_test.cpp
-    src/cxlkvs.cpp
-    src/meta.cpp
-    src/utils.cpp
-)
-
-target_include_directories(kvs_test PRIVATE ${INCLUDE_DIRECTORIES})
-
-target_link_libraries(kvs_test PRIVATE stdc++ numa pthread atomic isal)
+# 对test文件夹下的cpp文件执行编译
+foreach(TEST_NAME kvs_test object_index_test thread_contact)
+    add_executable(${TEST_NAME} 
+        test/${TEST_NAME}.cpp
+        src/bufferqueue.cpp
+        src/cxlkvs.cpp
+        src/meta.cpp
+        src/objectindex.cpp
+        src/stripe_index.cpp
+        src/utils.cpp
+    )
+  
+  target_link_libraries(${TEST_NAME} PUBLIC stdc++ numa pthread atomic isal)
+  target_include_directories(${TEST_NAME} PUBLIC ${INCLUDE_DIRECTORIES})
+endforeach()

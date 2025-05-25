@@ -29,7 +29,8 @@ extern int M;  // 生成的校验块的数量，默认为2
 extern int N;
 
 // 这里的一些全局参数可能后续需要放到cxlmem上
-extern unsigned int encode_inc;  // for random encoding
+// extern unsigned int encode_inc;  // for random encoding
+extern atomic<unsigned int> encode_inc;
 
 extern atomic<int> stripe_count;  // 条带计数
 

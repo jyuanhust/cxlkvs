@@ -13,7 +13,8 @@
 └── workloadGen
 
 rmshm.sh 为删除当前所有共享内存的脚本
-Test 为测试文件
+test 为测试文件，针对项目的，需要cmake编译链接
+Test 为独立测试文件，g++直接编译即可
 timeTest 为当前机器上的将数据存储到共享内存和memcached上的时间测试
 workloadGen 为负载生成
 

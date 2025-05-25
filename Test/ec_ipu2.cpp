@@ -1,5 +1,5 @@
 /**
- * 就地更新代码示例
+ * 就地更新代码示例，将新校验块直接填充到原校验块的位置
  */
 #include <isa-l.h>
 #include <numa.h>
@@ -126,26 +126,14 @@ int main(int argc, char* argv[]) {
         p[0] = parity_blocks[j];
         p[1] = delta_parity[j];
 
-        ec_encode_data(block_size, 2, 1, encode_gftbl_xor, p, &(new_parity[j]));
+        // ec_encode_data(block_size, 2, 1, encode_gftbl_xor, p, &(new_parity[j]));
+        ec_encode_data(block_size, 2, 1, encode_gftbl_xor, p, &(parity_blocks[j]));  // 直接填入原校验块地址
     }
     // 至此，以增量块计算的形式得到新校验块
 
-    cout << endl
-         << "New parity blocks calculated by delta:" << endl;
-    // 打印新校验块的内容
-    for (i = 0; i < PARITY_BLOCKS; i++) {
-        for (int j = 0; j < 16; j++) {  // 只打印前 16 字节
-            printf("%02x ", new_parity[i][j]);
-        }
-        printf("\n");
-    }
-
-    // 以普通编码形式获得新检验快
-    swap(data_blocks[index_wrong], new_data);
-    ec_encode_data(block_size, data_num, parity_num, g_tbls, data_blocks, parity_blocks);
 
     cout << endl
-         << "New parity blocks calculated by normal encoding:" << endl;
+         << "New parity blocks :" << endl;
     // 打印新校验块的内容
     for (i = 0; i < PARITY_BLOCKS; i++) {
         for (int j = 0; j < 16; j++) {  // 只打印前 16 字节

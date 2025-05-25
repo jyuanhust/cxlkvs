@@ -92,10 +92,11 @@ void cache_unec_key(int thread_id, char* key) {
  *
  */
 bool check_encode(vector<char*>& keys_encode) {
+    // lock_guard<mutex> lock(encode_mutex);
     vector<int> threads_encode;  // 待编码的服务器id
 
     int count = 0;
-    int inc1 = encode_inc;
+    int inc1 = encode_inc.fetch_add(1, memory_order_relaxed);
     for (int i = 0; i < nthreads; i++) {
         atomic<uint32_t>* index_ptr = (atomic<uint32_t>*)(buffer_queue + (inc1 % nthreads) * (sizeof(atomic<uint32_t>) + key_size * queue_size));
 
@@ -110,24 +111,29 @@ bool check_encode(vector<char*>& keys_encode) {
         inc1++;
     }
     // round_rabin the start tranverse point
-    encode_inc++;
+    // encode_inc++;
 
+    // cout << "正确应该插入的k size:" << K << endl;
     if (count == K) {
         for (size_t i = 0; i < threads_encode.size(); i++) {
             char* key = get_unec_key(threads_encode[i]);
             if (key == nullptr) {
                 // 删除之前获取的key的内存
-                for (size_t j = 0; j < keys_encode.size(); j++) {
-                    free(keys_encode[j]);
+                // for (size_t j = 0; j < keys_encode.size(); j++) {
+                //     free(keys_encode[j]);
+                // }
+                for(char* key: keys_encode){
+                    free(key);
                 }
 
                 return false;
             }
+            // cout << "插入key: " << *key << endl;
             keys_encode.push_back(key);
         }
+        return true;
     }
-
-    return true;
+    return false;
 }
 
 /**
@@ -156,12 +162,16 @@ bool encode_store(vector<char*>& keys_encode, int stripe_id) {
 
     // 从cxlkvs中获取数据块和校验块的内存
     for (int i = 0; i < K; i++) {
-        data[i] = (unsigned char*)kvs->get(keys_encode[i], false);
+        data[i] = (unsigned char*)kvs->get(keys_encode[i], false);  // 这里可能出错了
+        assert(data[i] != nullptr);
     }
 
-    for (int i = 0; i < N - K; i++)
+    for (int i = 0; i < N - K; i++){
         parity[i] = (unsigned char*)kvs->get(parity_keys[i], true);
+        assert(parity[i] != nullptr);
 
+    }
+        
     // 编码（这里的一些数据需不需要变成全局变量）
     unsigned char encode_gftbl[32 * K * (N - K)];
     unsigned char encode_matrix[N * K];
@@ -169,7 +179,7 @@ bool encode_store(vector<char*>& keys_encode, int stripe_id) {
     gf_gen_rs_matrix(encode_matrix, N, K);
     ec_init_tables(K, N - K, &(encode_matrix[K * K]), encode_gftbl);
 
-    ec_encode_data(value_size, K, N - K, encode_gftbl, data, parity);
+    ec_encode_data(value_size, K, N - K, encode_gftbl, data, parity); // segmentation fault, data地址本来应该是读取kvs数据块地址，但是是0x0
 
     return true;
 }

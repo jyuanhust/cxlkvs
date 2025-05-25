@@ -1,5 +1,6 @@
 /**
  * 在numa节点上分配内存，以数组形式保存 stripID -> temperature + (key + flag)s
+ * [ temperature | key0 | flag0 | key1 | flag1 | ... | keyN | flagN ]
  * temperature 用uint32存储，flag用uint8存储
  */
 
@@ -35,7 +36,7 @@ class StripeIndex {
     void alloc_cxl_mem();
 
     // 向指定条带中存储keys
-    void push_keys(uint32_t stripe_id, vector<char*> keys_encode);
+    void push_keys(uint32_t stripe_id, vector<char*> &keys_encode);
 
     // 将指定条带的key置为无效
     // void invalidate_keys(uint32_t stripe_id) {

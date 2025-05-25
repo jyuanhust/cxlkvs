@@ -18,7 +18,8 @@ int M = 2;  // 生成的校验块的数量，默认为2
 int N = K + M;
 
 // 这里的一些全局参数可能后续需要放到cxlmem上
-unsigned int encode_inc = 0;  // for random encoding
+// unsigned int encode_inc = 0;  // for random encoding
+atomic<unsigned int> encode_inc{0}; // 考虑线程竞争，可能会导致++不正确
 
 atomic<int> stripe_count;  // 条带计数，只会增加
 
