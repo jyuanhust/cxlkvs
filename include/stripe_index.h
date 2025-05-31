@@ -2,6 +2,7 @@
  * 在numa节点上分配内存，以数组形式保存 stripID -> temperature + (key + flag)s
  * [ temperature | key0 | flag0 | key1 | flag1 | ... | keyN | flagN ]
  * temperature 用uint32存储，flag用uint8存储
+ * flag为0时该key有效，为1时为无效，用于全条带更新
  */
 
 #pragma once

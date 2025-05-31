@@ -1,3 +1,6 @@
+/**
+ * 测试将数据拷贝到cxlmem上的延迟
+ */
 #include <isa-l.h>
 #include <numa.h>
 #include <numaif.h>

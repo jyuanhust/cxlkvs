@@ -86,7 +86,8 @@ void ObjectIndex::init_free_area() {
 // 多线程同时分配时会出现竞争
 char* ObjectIndex::alloc_entry() {
     if (free_block_list == NULL) {
-        perror("free_block_list is NULL");
+        cerr << "ObjectIndex: free_block_list is NULL" << endl;
+        exit(1);
         return NULL;  // 实验中要保证这种情况不能出现
     }
 

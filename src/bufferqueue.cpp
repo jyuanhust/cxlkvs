@@ -1,3 +1,6 @@
+/**
+ * (index + queue_size个key)s
+ */
 #include "bufferqueue.h"
 
 #include <iostream>
@@ -6,7 +9,7 @@
 char* buffer_queue;
 int queue_shmid;
 
-int queue_size = 100;  // 缓存队列的大小，最多缓存100个key
+int queue_size = 100;  // 缓存队列的大小，默认最多缓存100个key
 
 void init_buffer_queue() {
     size_t size = (sizeof(atomic<uint32_t>) + key_size * queue_size) * nthreads;
@@ -78,7 +81,8 @@ void cache_unec_key(int thread_id, char* key) {
         index = index_ptr->load();
 
         if (index == queue_size) {
-            perror("queue is full");
+            cerr << "cache_unec_key: queue_size("<< queue_size << ") is full" << endl;
+            exit(1);
         }
 
         memcpy(queue_start + index * key_size, key, key_size);
@@ -122,7 +126,7 @@ bool check_encode(vector<char*>& keys_encode) {
                 // for (size_t j = 0; j < keys_encode.size(); j++) {
                 //     free(keys_encode[j]);
                 // }
-                for(char* key: keys_encode){
+                for (char* key : keys_encode) {
                     free(key);
                 }
 
@@ -166,12 +170,11 @@ bool encode_store(vector<char*>& keys_encode, int stripe_id) {
         assert(data[i] != nullptr);
     }
 
-    for (int i = 0; i < N - K; i++){
+    for (int i = 0; i < N - K; i++) {
         parity[i] = (unsigned char*)kvs->get(parity_keys[i], true);
         assert(parity[i] != nullptr);
-
     }
-        
+
     // 编码（这里的一些数据需不需要变成全局变量）
     unsigned char encode_gftbl[32 * K * (N - K)];
     unsigned char encode_matrix[N * K];
@@ -179,7 +182,7 @@ bool encode_store(vector<char*>& keys_encode, int stripe_id) {
     gf_gen_rs_matrix(encode_matrix, N, K);
     ec_init_tables(K, N - K, &(encode_matrix[K * K]), encode_gftbl);
 
-    ec_encode_data(value_size, K, N - K, encode_gftbl, data, parity); // segmentation fault, data地址本来应该是读取kvs数据块地址，但是是0x0
+    ec_encode_data(value_size, K, N - K, encode_gftbl, data, parity);  // segmentation fault, data地址本来应该是读取kvs数据块地址，但是是0x0
 
     return true;
 }

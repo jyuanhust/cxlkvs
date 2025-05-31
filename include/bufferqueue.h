@@ -1,14 +1,14 @@
 #pragma once
 
-#include "meta.h"
 #include "isa-l.h"
+#include "meta.h"
 
 using namespace std;
 
 extern char* buffer_queue;
 extern int queue_shmid;
 
-extern int queue_size; // 缓存队列的大小，最多缓存100个key
+extern int queue_size;  // 缓存队列的大小，最多缓存100个key
 
 // 初始化缓存队列
 void init_buffer_queue();
@@ -27,7 +27,6 @@ void cache_unec_key(int thread_id, char* key);
  * 检查是否有足够的未编码key，若有则返回true，并且在keys_encode中存储未编码key
  */
 bool check_encode(vector<char*>& keys_encode);
-
 
 /**
  * keys_encode为未编码keys，stripe_ID为此条带的id

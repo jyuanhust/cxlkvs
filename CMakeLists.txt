@@ -14,7 +14,7 @@ set(INCLUDE_DIRECTORIES include)
 
 
 # 对src下的带有main的cpp文件执行编译
-foreach(TEST_NAME inplace)
+foreach(TEST_NAME main)
     add_executable(${TEST_NAME} 
         src/${TEST_NAME}.cpp
         src/bufferqueue.cpp
@@ -23,6 +23,7 @@ foreach(TEST_NAME inplace)
         src/objectindex.cpp
         src/stripe_index.cpp
         src/utils.cpp
+        src/update.cpp
     )
   
   target_link_libraries(${TEST_NAME} PUBLIC stdc++ numa pthread atomic isal)

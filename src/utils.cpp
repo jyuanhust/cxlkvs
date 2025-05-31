@@ -124,3 +124,28 @@ void workload_print(map<int, vector<char*>>& data_insert, map<int, vector<Txn>>&
         cout << endl;
     }
 }
+
+/**
+ * [ temperature | key0 | flag0 | key1 | flag1 | ... | keyN | flagN ]
+ * temperature 用uint32存储，flag用uint8存储
+ * 
+ * 传入的num为条带数量
+ */
+void stripe_print(StripeIndex* stripe_index, int num){
+    printf("there are %d stripes totally\n", num);
+    char* ptr = stripe_index->free_area;
+    for(int i = 0; i < num; i++){
+        uint32_t temperature = *(uint32_t *)ptr;
+        ptr = ptr + sizeof(uint32_t);
+        printf("temperature: %d  keys: ", temperature);
+        for(int j = 0; j < stripe_index->stripe_size; j++){
+            char key[key_size];
+            memcpy(key, ptr, key_size);
+            ptr = ptr + key_size;
+            uint8_t flag = *(uint8_t*)ptr;
+            ptr = ptr + sizeof(uint8_t);
+            printf("%d-%s  ", flag, key);
+        }
+        cout << endl;
+    }
+}

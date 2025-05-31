@@ -1,5 +1,6 @@
 #include "meta.h"
-
+#include <map>
+#include "utils.h"
 int nthreads = 8;  // 线程数量，也即内存节点服务器的数量
 
 int key_size = 50;
@@ -26,3 +27,17 @@ atomic<int> stripe_count;  // 条带计数，只会增加
 KVStore* kvs;
 ObjectIndex* obj_index;
 StripeIndex* stripe_index;
+
+// 存储 thread_id->keys 的map，即 服务器id -》 其所要处理的数据
+map<int, vector<char*>> data_insert;
+map<int, vector<Txn>> data_txn;
+
+// 每个服务器的kvs，
+map<int, map<string, char*>> local_kvs;
+
+uint8_t* encode_matrix;
+uint8_t* g_tbls;
+
+// XOR
+uint8_t encode_gftbl_xor[32 * 2 * 1];
+uint8_t encode_matrix_xor[3 * 2];

@@ -1,3 +1,6 @@
+/**
+ * 测试将数据拷贝到memcached上的延迟
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

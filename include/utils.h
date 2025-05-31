@@ -10,11 +10,6 @@
 
 using namespace std;
 
-class Txn {
-   public:
-    uint8_t op;  // read = 0, update = 1
-    char* key;
-};
 
 extern hash<string> hash_fn;
 
@@ -32,6 +27,10 @@ int get_core_id(int task_id);
 // load数据集的读取
 bool workload_load(map<int, vector<char*>>& data_insert, string path_load);
 
+class Txn;
+
 bool workload_txn(map<int, vector<Txn>>& data_txn, string path_txn);
 
 void workload_print(map<int, vector<char*>>& data_insert, map<int, vector<Txn>>& data_txn);
+
+void stripe_print(StripeIndex* stripe_index, int num);

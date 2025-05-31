@@ -23,8 +23,8 @@
 #   Request distribution: zipfian
 
 fieldcount=1
-recordcount=15
-operationcount=15
+recordcount=1000
+operationcount=1000
 fieldlength=1
 
 workload=site.ycsb.workloads.CoreWorkload
